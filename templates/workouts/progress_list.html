@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Progress - FitTrack Pro{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-chart-line me-2"></i>My Progress</h2>
+        <a href="{% url 'workouts:progress_add' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Log Progress
+        </a>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Progress Overview</h5>
+        </div>
+        <div class="card-body">
+            <canvas id="progressChart"></canvas>
+        </div>
+    </div>
+    
+
+    <!-- Progress History -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white">
+            <h4 class="mb-0"><i class="fas fa-history me-2"></i>Progress History</h4>
+        </div>
+        <div class="card-body">
+            {% if progress_records %}
+                {% for progress in progress_records %}
+                    <div class="d-flex justify-content-between align-items-center border-bottom py-3">
+                        <div>
+                            <h5 class="mb-1">{{ progress.date|date:"M d, Y" }}</h5>
+                            <p class="text-muted mb-0">
+                                Weight: {{ progress.weight }}kg | Height: {{ progress.height }}cm
+                                {% if progress.bmi %}| BMI: {{ progress.bmi }}{% endif %}
+                            </p>
+                            {% if progress.notes %}
+                                <small class="text-muted">{{ progress.notes }}</small>
+                            {% endif %}
+                        </div>
+                        <div class="btn-group">
+                            <a href="{% url 'workouts:progress_edit' progress.pk %}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'workouts:progress_delete' progress.pk %}" class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted mb-0">No progress records yet. Start logging your progress!</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('progressChart').getContext('2d');
+        const progressData = {{ progress_data|safe }};
+    
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: progressData.dates,
+                datasets: [
+                    {
+                        label: 'Weight (kg)',
+                        data: progressData.weights,
+                        borderColor: '#2E6F40',
+                        backgroundColor: 'rgba(46, 111, 64, 0.2)',
+                        fill: true,
+                    },
+                    {
+                        label: 'BMI',
+                        data: progressData.bmis,
+                        borderColor: '#68BA7F',
+                        backgroundColor: 'rgba(104, 186, 127, 0.2)',
+                        fill: true,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Your Progress Over Time',
+                        font: {
+                            size: 18
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Date',
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Value',
+                        }
+                    }
+                }
+            }
+        });
+    });
+    </script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}

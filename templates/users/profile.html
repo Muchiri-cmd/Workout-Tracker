@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Profile - FitTrack Pro{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Profile Header -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="position-relative">
+                            <img src="{{ user.profile.profile_picture.url }}" 
+                                 alt="{{ user.get_full_name }}" 
+                                 class="rounded-circle"
+                                 style="width: 120px; height: 120px; object-fit: cover;">
+                        </div>
+                        <div class="ms-4">
+                            <h2 class="mb-1">{{ user.get_full_name }}</h2>
+                            <p class="text-muted mb-2">@{{ user.username }}</p>
+                            <p class="mb-2">
+                                <i class="fas fa-running me-2"></i>Fitness Level: 
+                                <span class="badge bg-primary">{{ user.profile.fitness_level|title }}</span>
+                            </p>
+                            {% if user.profile.bio %}
+                                <p class="mb-0">{{ user.profile.bio }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-dumbbell fa-2x text-primary mb-2"></i>
+                    <h3 class="mb-1">{{ user_stats.total_workouts }}</h3>
+                    <p class="text-muted mb-0">Total Workouts</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-fire fa-2x text-danger mb-2"></i>
+                    <h3 class="mb-1">{{ user_stats.total_calories }}</h3>
+                    <p class="text-muted mb-0">Calories Burned</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-bullseye fa-2x text-success mb-2"></i>
+                    <h3 class="mb-1">{{ user_stats.active_goals }}</h3>
+                    <p class="text-muted mb-0">Active Goals</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-trophy fa-2x text-warning mb-2"></i>
+                    <h3 class="mb-1">{{ user_stats.completed_goals }}</h3>
+                    <p class="text-muted mb-0">Completed Goals</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Forms -->
+    <div class="row">
+        <!-- User Information Form -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user me-2"></i>Personal Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="mb-0">
+                        {% csrf_token %}
+                        {{ u_form|crispy }}
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Update Information
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Information Form -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cog me-2"></i>Profile Settings
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" class="mb-0">
+                        {% csrf_token %}
+                        {{ p_form|crispy }}
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Update Profile
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0">Security Settings</h5>
+                            <p class="text-muted mb-0">Manage your account security</p>
+                        </div>
+                        <div>
+                            <a href="{% url 'users:password_change' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-key me-2"></i>Change Password
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

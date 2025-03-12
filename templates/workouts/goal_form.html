@@ -1,0 +1,138 @@
+
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ title }} - FitTrack Pro{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h4 class="mb-0">
+                        <i class="fas fa-bullseye me-2"></i>{{ title }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_goal_type" class="form-label">Goal Type</label>
+                            <select name="goal_type" id="id_goal_type" class="form-select" required>
+                                <option value="">Select a goal type</option>
+                                <option value="distance" {% if form.goal_type.value == 'distance' %}selected{% endif %}>Distance</option>
+                                <option value="weight_loss" {% if form.goal_type.value == 'weight_loss' %}selected{% endif %}>Weight Loss</option>
+                                <option value="workout_frequency" {% if form.goal_type.value == 'workout_frequency' %}selected{% endif %}>Workout Frequency</option>
+                                <option value="strength" {% if form.goal_type.value == 'strength' %}selected{% endif %}>Strength</option>
+                                <option value="endurance" {% if form.goal_type.value == 'endurance' %}selected{% endif %}>Endurance</option>
+                            </select>
+                            {% if form.goal_type.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.goal_type.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_target_value" class="form-label">Target Value</label>
+                            <div class="input-group">
+                                <input type="number" name="target_value" id="id_target_value" 
+                                       class="form-control" step="0.01" required
+                                       value="{{ form.target_value.value|default:'' }}">
+                                <span class="input-group-text unit-label">units</span>
+                            </div>
+                            {% if form.target_value.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.target_value.errors }}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">Set your target goal value (e.g., 5 km for distance, 10 kg for weight loss)</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_current_progress" class="form-label">Current Progress</label>
+                            <div class="input-group">
+                                <input type="number" name="current_progress" id="id_current_progress" 
+                                       class="form-control" step="0.01" required
+                                       value="{{ form.current_progress.value|default:'0' }}">
+                                <span class="input-group-text unit-label">units</span>
+                            </div>
+                            {% if form.current_progress.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.current_progress.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_deadline" class="form-label">Target Date</label>
+                            <input type="date" name="deadline" id="id_deadline" 
+                                   class="form-control" required
+                                   value="{{ form.deadline.value|date:'Y-m-d'|default:'' }}"
+                                   min="{{ today|date:'Y-m-d' }}">
+                            {% if form.deadline.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.deadline.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Goal
+                            </button>
+                            <a href="{% url 'workouts:goal_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Update unit label based on goal type
+    const goalTypeInput = document.getElementById('id_goal_type');
+    const unitLabels = document.getElementsByClassName('unit-label');
+    
+    function updateUnitLabels() {
+        let unit = '';
+        switch(goalTypeInput.value) {
+            case 'distance':
+                unit = 'km';
+                break;
+            case 'weight_loss':
+                unit = 'kg';
+                break;
+            case 'workout_frequency':
+                unit = 'times/week';
+                break;
+            case 'strength':
+                unit = 'kg';
+                break;
+            case 'endurance':
+                unit = 'mins';
+                break;
+            default:
+                unit = 'units';
+        }
+        
+        Array.from(unitLabels).forEach(label => {
+            label.textContent = unit;
+        });
+    }
+    
+    if (goalTypeInput) {
+        goalTypeInput.addEventListener('change', updateUnitLabels);
+        // Update labels on page load
+        updateUnitLabels();
+    }
+});
+</script>
+{% endblock %}

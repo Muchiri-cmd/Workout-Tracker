@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ title }} - FitTrack Pro{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h4 class="mb-0">
+                        <i class="fas fa-dumbbell me-2"></i>{{ title }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_type" class="form-label">Workout Type</label>
+                            <select name="type" id="id_type" class="form-select" required>
+                                <option value="">Select a workout type</option>
+                                <option value="running" {% if form.type.value == 'running' %}selected{% endif %}>Running</option>
+                                <option value="cycling" {% if form.type.value == 'cycling' %}selected{% endif %}>Cycling</option>
+                                <option value="swimming" {% if form.type.value == 'swimming' %}selected{% endif %}>Swimming</option>
+                                <option value="weight_training" {% if form.type.value == 'weight_training' %}selected{% endif %}>Weight Training</option>
+                                <option value="yoga" {% if form.type.value == 'yoga' %}selected{% endif %}>Yoga</option>
+                                <option value="hiit" {% if form.type.value == 'hiit' %}selected{% endif %}>HIIT</option>
+                                <option value="other" {% if form.type.value == 'other' %}selected{% endif %}>Other</option>
+                            </select>
+                            {% if form.type.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.type.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_duration" class="form-label">Duration (minutes)</label>
+                            <input type="number" name="duration" id="id_duration" 
+                                   class="form-control" min="1" required
+                                   value="{{ form.duration.value|default:'' }}"
+                                   onchange="updateCalories()">
+                            {% if form.duration.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.duration.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                       
+                        <div class="mb-3">
+                            <label for="id_notes" class="form-label">Notes</label>
+                            <textarea name="notes" id="id_notes" class="form-control" rows="3">{{ form.notes.value|default:'' }}</textarea>
+                            {% if form.notes.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.notes.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Workout
+                            </button>
+                            <a href="{% url 'workouts:workout_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Calculate estimated calories based on workout type and duration
+    const typeInput = document.getElementById('id_type');
+    const durationInput = document.getElementById('id_duration');
+    const caloriesInput = document.getElementById('id_calories_burned');
+    
+    function updateCalories() {
+        if (typeInput.value && durationInput.value) {
+            const duration = parseInt(durationInput.value);
+            let caloriesPerMinute = 0;
+            
+            // Rough estimates of calories burned per minute for different activities
+            switch(typeInput.value) {
+                case 'running':
+                    caloriesPerMinute = 10;
+                    break;
+                case 'cycling':
+                    caloriesPerMinute = 7;
+                    break;
+                case 'swimming':
+                    caloriesPerMinute = 9;
+                    break;
+                case 'weight_training':
+                    caloriesPerMinute = 5;
+                    break;
+                case 'yoga':
+                    caloriesPerMinute = 3;
+                    break;
+                case 'hiit':
+                    caloriesPerMinute = 12;
+                    break;
+                default:
+                    caloriesPerMinute = 5;
+            }
+            
+            const totalCalories = Math.round(duration * caloriesPerMinute);
+            caloriesInput.value = totalCalories;
+        }
+    }
+    
+    if (typeInput && durationInput && caloriesInput) {
+        typeInput.addEventListener('change', updateCalories);
+        durationInput.addEventListener('change', updateCalories);
+    }
+});
+</script>
+{% endblock %}

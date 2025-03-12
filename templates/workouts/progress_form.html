@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ title }} - FitTrack Pro{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h4 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>{{ title }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_weight" class="form-label">Weight (kg)</label>
+                            <input type="number" name="weight" id="id_weight" 
+                                   class="form-control" step="0.1" min="20" max="300" required
+                                   value="{{ form.weight.value|default:'' }}">
+                            {% if form.weight.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.weight.errors }}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">Enter your current weight in kilograms</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_height" class="form-label">Height (cm)</label>
+                            <input type="number" name="height" id="id_height" 
+                                   class="form-control" step="0.1" min="100" max="250" required
+                                   value="{{ form.height.value|default:'' }}">
+                            {% if form.height.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.height.errors }}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">Enter your height in centimeters</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">BMI</label>
+                            <div class="input-group">
+                                <input type="text" id="bmi_display" class="form-control" readonly>
+                                <span class="input-group-text" id="bmi_category"></span>
+                            </div>
+                            <div class="form-text">Your Body Mass Index (BMI) will be calculated automatically</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_notes" class="form-label">Notes</label>
+                            <textarea name="notes" id="id_notes" class="form-control" rows="3">{{ form.notes.value|default:'' }}</textarea>
+                            {% if form.notes.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.notes.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Progress
+                            </button>
+                            <a href="{% url 'workouts:progress_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const weightInput = document.getElementById('id_weight');
+    const heightInput = document.getElementById('id_height');
+    const bmiDisplay = document.getElementById('bmi_display');
+    const bmiCategory = document.getElementById('bmi_category');
+    
+    function getBMICategory(bmi) {
+        if (bmi < 18.5) return ['Underweight', 'text-warning'];
+        if (bmi < 25) return ['Normal', 'text-success'];
+        if (bmi < 30) return ['Overweight', 'text-warning'];
+        return ['Obese', 'text-danger'];
+    }
+    
+    function calculateBMI() {
+        if (weightInput.value && heightInput.value) {
+            const weight = parseFloat(weightInput.value);
+            const height = parseFloat(heightInput.value) / 100; // convert cm to m
+            const bmi = (weight / (height * height)).toFixed(2);
+            
+            bmiDisplay.value = bmi;
+            const [category, colorClass] = getBMICategory(bmi);
+            bmiCategory.textContent = category;
+            bmiCategory.className = `input-group-text ${colorClass}`;
+        }
+    }
+    
+    if (weightInput && heightInput) {
+        weightInput.addEventListener('input', calculateBMI);
+        heightInput.addEventListener('input', calculateBMI);
+        // Calculate on page load if values exist
+        calculateBMI();
+    }
+});
+</script>
+{% endblock %}

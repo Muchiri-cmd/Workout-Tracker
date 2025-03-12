@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Workouts - FitTrack Pro{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-dumbbell me-2"></i>My Workouts</h2>
+        <button class="btn btn-primary"
+                hx-get="{% url 'workouts:workout_add' %}"
+                hx-target="#modal-content"
+                data-bs-toggle="modal"
+                data-bs-target="#modal">
+            <i class="fas fa-plus me-2"></i>Add Workout
+        </button>
+    </div>
+
+    <!-- Workout Statistics -->
+    <div class="row mb-4" id="workout-stats">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-fire fa-2x text-danger mb-2"></i>
+                    <h3 class="mb-1">{{ total_calories|default:"0" }}</h3>
+                    <p class="text-muted mb-0">Total Calories</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-clock fa-2x text-primary mb-2"></i>
+                    <h3 class="mb-1">{{ total_duration|default:"0" }}</h3>
+                    <p class="text-muted mb-0">Total Minutes</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-calendar-check fa-2x text-success mb-2"></i>
+                    <h3 class="mb-1">{{ total_workouts|default:"0" }}</h3>
+                    <p class="text-muted mb-0">Total Workouts</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-bolt fa-2x text-warning mb-2"></i>
+                    <h3 class="mb-1">{{ streak_days|default:"0" }}</h3>
+                    <p class="text-muted mb-0">Day Streak</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workout List -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white">
+            <h4 class="mb-0"><i class="fas fa-list me-2"></i>Recent Workouts</h4>
+        </div>
+        <div class="card-body">
+            <div id="workout-list">
+                {% for workout in workouts %}
+                    {% include "workouts/partials/workout_item.html" %}
+                {% empty %}
+                    <div class="text-center text-muted py-5">
+                        <i class="fas fa-dumbbell fa-3x mb-3"></i>
+                        <h5>No workouts yet</h5>
+                        <p>Start tracking your fitness journey by adding your first workout!</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" id="modal-content">
+            <!-- Modal content will be loaded here -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Bootstrap modals
+        var myModal = new bootstrap.Modal(document.getElementById('modal'));
+        
+        // Handle form submission success
+        htmx.on("htmx:afterSwap", function(evt) {
+            if (evt.detail.target.id === "workout-list") {
+                myModal.hide();
+            }
+        });
+    });
+</script>
+{% endblock %}
