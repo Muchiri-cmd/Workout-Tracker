@@ -16,9 +16,8 @@
         </button>
     </div>
 
-    <!-- Workout Statistics -->
-    <div class="row mb-4" id="workout-stats">
-        <div class="col-md-3">
+    <div class="row mb-4 justify-content-center" id="workout-stats">
+        <div class="col-md-4">
             <div class="card border-0 shadow-sm">
                 <div class="card-body text-center">
                     <i class="fas fa-fire fa-2x text-danger mb-2"></i>
@@ -27,7 +26,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="card border-0 shadow-sm">
                 <div class="card-body text-center">
                     <i class="fas fa-clock fa-2x text-primary mb-2"></i>
@@ -36,7 +35,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="card border-0 shadow-sm">
                 <div class="card-body text-center">
                     <i class="fas fa-calendar-check fa-2x text-success mb-2"></i>
@@ -45,18 +44,9 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body text-center">
-                    <i class="fas fa-bolt fa-2x text-warning mb-2"></i>
-                    <h3 class="mb-1">{{ streak_days|default:"0" }}</h3>
-                    <p class="text-muted mb-0">Day Streak</p>
-                </div>
-            </div>
-        </div>
     </div>
+    
 
-    <!-- Workout List -->
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-white">
             <h4 class="mb-0"><i class="fas fa-list me-2"></i>Recent Workouts</h4>
@@ -91,10 +81,8 @@
 <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize Bootstrap modals
         var myModal = new bootstrap.Modal(document.getElementById('modal'));
         
-        // Handle form submission success
         htmx.on("htmx:afterSwap", function(evt) {
             if (evt.detail.target.id === "workout-list") {
                 myModal.hide();

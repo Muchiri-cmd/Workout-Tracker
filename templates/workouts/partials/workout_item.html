@@ -1,4 +1,4 @@
-<div class="workout-item mb-3 p-3 border rounded">
+<div class="workout-item mb-3 p-2 border-bottom rounded">
     <div class="d-flex justify-content-between align-items-start">
         <div>
             <h5 class="mb-1">{{ workout.get_workout_type_display }}</h5>
@@ -10,21 +10,25 @@
                 <i class="fas fa-calendar me-1"></i>{{ workout.date|date:"M d, Y" }}
             </small>
         </div>
-        <div class="btn-group">
-            <button class="btn btn-outline-primary btn-sm"
+        <div class="btn-group" style="gap: 5px; align-items: center;">
+            <button class="btn btn-primary btn-sm" 
                     hx-get="{% url 'workouts:workout_edit' workout.pk %}"
                     hx-target="#modal-content"
                     data-bs-toggle="modal"
-                    data-bs-target="#modal">
+                    data-bs-target="#modal"
+                    style="display: flex; align-items: center; justify-content: center; padding: 6px 10px; border: none;">
                 <i class="fas fa-edit"></i>
             </button>
+        
             <form method="post" 
                   action="{% url 'workouts:workout_delete' workout.pk %}"
                   hx-post="{% url 'workouts:workout_delete' workout.pk %}"
                   hx-confirm="Are you sure you want to delete this workout?"
-                  hx-target="#workout-list">
+                  hx-target="#workout-list"
+                  style="margin: 0;">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-outline-danger btn-sm">
+                <button type="submit" class="btn btn-danger btn-sm"
+                        style="display: flex; align-items: center; justify-content: center; padding: 6px 10px; border: none;">
                     <i class="fas fa-trash"></i>
                 </button>
             </form>

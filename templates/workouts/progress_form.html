@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function calculateBMI() {
         if (weightInput.value && heightInput.value) {
             const weight = parseFloat(weightInput.value);
-            const height = parseFloat(heightInput.value) / 100; // convert cm to m
+            const height = parseFloat(heightInput.value) / 100; 
             const bmi = (weight / (height * height)).toFixed(2);
             
             bmiDisplay.value = bmi;
@@ -108,7 +108,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (weightInput && heightInput) {
         weightInput.addEventListener('input', calculateBMI);
         heightInput.addEventListener('input', calculateBMI);
-        // Calculate on page load if values exist
         calculateBMI();
     }
 });

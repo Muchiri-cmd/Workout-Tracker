@@ -27,17 +27,15 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
-# Application definition
-
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.humanize',  # Add humanize for better date formatting
+    'django.contrib.humanize',
     'crispy_forms',
     'crispy_bootstrap5',
     'django_htmx',
@@ -142,3 +140,41 @@ LOGOUT_REDIRECT_URL = 'users:login'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+JAZZMIN_SETTINGS = {
+    "site_title": "FitTrack",
+    "site_header": "your_site_header",
+    "site_brand": "FitTrack",
+    "site_icon": "images/favicon.png",
+    "site_logo": None,
+    "welcome_sign": "Welcome to the FitTrack",
+    "copyright": "FitTrack",
+    "user_avatar": None,
+   
+    "show_sidebar": True,
+
+    "navigation_expanded": True,
+ 
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "users.User": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "admin.LogEntry": "fas fa-file",
+    },
+
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-arrow-circle-right",
+  
+    "related_modal_active": False,
+
+    "custom_js": None,
+   
+    "show_ui_builder": False,
+    "changeform_format": "horizontal_tabs",
+    # override change forms on a per modeladmin basis
+    "changeform_format_overrides": {
+        "auth.user": "collapsible",
+        "auth.group": "vertical_tabs",
+    },
+}

@@ -8,6 +8,7 @@ from django.template.loader import render_to_string
 from datetime import timedelta
 from .models import Workout, Goal, Progress
 from .forms import WorkoutForm, GoalForm, ProgressForm
+import json 
 
 def calculate_workout_stats(user):
     """Calculate workout statistics for a user"""
@@ -53,24 +54,25 @@ def dashboard(request):
     
     # Calculate workout statistics
     stats = calculate_workout_stats(request.user)
-    
-    # Get progress data for chart
+
     progress_records = Progress.objects.filter(
         user=request.user,
         date__gte=today - timedelta(days=30)
     ).order_by('date')
-    
-    progress_data = [{
-        'date': record.date.strftime('%Y-%m-%d'),
-        'weight': float(record.weight),
-        'bmi': float(record.bmi)
-    } for record in progress_records]
-    
+
+    progress_data = {
+    'labels': [record.date.strftime('%Y-%m-%d') for record in progress_records],
+    'weight': [float(record.weight) for record in progress_records],
+    'bmi': [float(record.bmi) for record in progress_records],
+    'values': [float(record.weight) for record in progress_records]
+    }
+
+
     context = {
         'workouts': workouts,
         'goals': goals,
         'latest_progress': latest_progress,
-        'progress_data': progress_data,
+        'progress_data': json.dumps(progress_data),
         'total_workouts': stats['total_workouts'],
         'total_calories': stats['total_calories'],
         'total_duration': stats['total_duration'],

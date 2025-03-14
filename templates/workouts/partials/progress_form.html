@@ -23,14 +23,13 @@ document.addEventListener('DOMContentLoaded', function() {
     bmiDisplay.className = 'alert alert-info mt-3';
     bmiDisplay.style.display = 'none';
     
-    // Insert BMI display after the form fields
     const form = document.querySelector('form');
     form.insertBefore(bmiDisplay, form.querySelector('.mt-3'));
 
     function calculateBMI() {
         if (weightInput.value && heightInput.value) {
             const weight = parseFloat(weightInput.value);
-            const height = parseFloat(heightInput.value) / 100; // convert cm to m
+            const height = parseFloat(heightInput.value) / 100;
             const bmi = (weight / (height * height)).toFixed(1);
             
             let category = '';
@@ -51,7 +50,6 @@ document.addEventListener('DOMContentLoaded', function() {
     weightInput?.addEventListener('input', calculateBMI);
     heightInput?.addEventListener('input', calculateBMI);
     
-    // Calculate initial BMI if values are present
     calculateBMI();
 });
 </script>

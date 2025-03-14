@@ -17,6 +17,5 @@ class UserAdmin(BaseUserAdmin):
     search_fields = ('username', 'first_name', 'last_name', 'email')
     ordering = ('-date_joined',)
 
-# Re-register UserAdmin
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)

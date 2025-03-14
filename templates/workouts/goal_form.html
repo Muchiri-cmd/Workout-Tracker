@@ -97,7 +97,6 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Update unit label based on goal type
     const goalTypeInput = document.getElementById('id_goal_type');
     const unitLabels = document.getElementsByClassName('unit-label');
     
@@ -130,7 +129,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (goalTypeInput) {
         goalTypeInput.addEventListener('change', updateUnitLabels);
-        // Update labels on page load
         updateUnitLabels();
     }
 });

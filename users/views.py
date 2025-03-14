@@ -7,7 +7,6 @@ from django.utils import timezone
 from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm
 
 # Create your views here.
-
 def register(request):
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
@@ -29,13 +28,13 @@ def profile(request):
         if u_form.is_valid() and p_form.is_valid():
             u_form.save()
             p_form.save()
-            messages.success(request, 'Your profile has been updated!')
-            return redirect('profile')
+            messages.success(request, 'Your profile has been updated successfully!')
+            return redirect('users:profile') 
+    
     else:
         u_form = UserUpdateForm(instance=request.user)
         p_form = ProfileUpdateForm(instance=request.user.profile)
-    
-    # Get latest progress
+        
     latest_progress = request.user.progress_records.order_by('-date').first()
     
     context = {
@@ -50,4 +49,3 @@ def profile(request):
         }
     }
     return render(request, 'users/profile.html', context)
-

@@ -23,8 +23,8 @@
                 </span>
             </p>
         </div>
-        <div class="btn-group">
-            <button class="btn btn-outline-primary btn-sm"
+        <div class="btn-group" style="gap: 5px; align-items: center;">
+            <button class="btn btn-primary btn-sm"
                     hx-get="{% url 'workouts:goal_edit' goal.pk %}"
                     hx-target="#modal-content"
                     data-bs-toggle="modal"
@@ -37,7 +37,7 @@
                   hx-target="#goal-list"
                   hx-swap="outerHTML">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-outline-danger btn-sm">
+                <button type="submit" class="btn btn-danger btn-sm">
                     <i class="fas fa-trash"></i>
                 </button>
             </form>
