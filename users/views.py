@@ -12,7 +12,7 @@ def register(request):
         form = UserRegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)  # Auto-login after registration
+            login(request, user)  
             messages.success(request, f'Welcome to FitTrack Pro, {user.first_name}! Your account has been created.')
             return redirect('dashboard')
     else:

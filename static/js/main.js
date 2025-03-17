@@ -1,4 +1,3 @@
-// Workout calorie calculator
 function updateCalories() {
     const duration = parseInt(document.getElementById('id_duration').value) || 0;
     const intensity = document.getElementById('id_intensity').value;
@@ -22,8 +21,6 @@ function updateCalories() {
     }
 }
 
-
-// Goal progress animation
 function animateProgress() {
     const progressBars = document.querySelectorAll('.progress-bar');
     progressBars.forEach(bar => {
@@ -32,7 +29,6 @@ function animateProgress() {
     });
 }
 
-// Modals handling
 document.addEventListener('DOMContentLoaded', function() {
     const modals = document.querySelectorAll('.modal');
     modals.forEach(modal => {
@@ -69,7 +65,6 @@ function validateForm(formId) {
     form.classList.add('was-validated');
 }
 
-// Notification system
 function showNotification(message, type = 'success') {
     const toast = document.createElement('div');
     toast.className = `toast align-items-center text-white bg-${type} border-0`;

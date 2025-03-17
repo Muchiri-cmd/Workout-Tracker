@@ -33,28 +33,26 @@ class Workout(models.Model):
         ordering = ['-date']
 
     def save(self, *args, **kwargs):
-        if not self.calories_burned:  # Only calculate if not manually set
+        if not self.calories_burned:  
             self.calories_burned = self.calculate_calories()
         super().save(*args, **kwargs)
 
     def calculate_calories(self):
-        # Base calorie rates per minute
         calorie_rates = {
-            'strength': 8,      # 7-9 calories per minute
-            'cardio': 11,       # 10-12 calories per minute
-            'hiit': 13.5,       # 12-15 calories per minute
-            'yoga': 5,          # 4-6 calories per minute
-            'calisthenics': 9,  # 8-10 calories per minute
+            'strength': 8,      
+            'cardio': 11,       
+            'hiit': 13.5,       
+            'yoga': 5,          
+            'calisthenics': 9, 
         }
 
-        # Intensity multipliers
         intensity_factors = {
             'low': 0.8,
             'medium': 1.0,
             'high': 1.2,
         }
 
-        base_rate = calorie_rates.get(self.type, 8)  # Default to 8 if type not found
+        base_rate = calorie_rates.get(self.type, 8)  
         intensity_multiplier = intensity_factors.get(self.intensity, 1.0)
         
         return int(base_rate * self.duration * intensity_multiplier)

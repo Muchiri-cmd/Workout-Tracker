@@ -24,7 +24,6 @@ class Profile(models.Model):
         return f'{self.user.username} Profile'
     
     def save(self, *args, **kwargs):
-        # If this is a new profile, ensure it has the default image
         if not self.pk and not self.profile_picture:
             self.profile_picture = 'default.jpg'
             
@@ -40,7 +39,6 @@ class Profile(models.Model):
                         img.thumbnail(output_size)
                         img.save(img_path)
             except Exception as e:
-                # If there's any error processing the image, set to default
                 if not self.profile_picture or not os.path.exists(self.profile_picture.path):
                     self.profile_picture = 'default.jpg'
                     self.save(update_fields=['profile_picture'])

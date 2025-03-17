@@ -20,7 +20,6 @@ def calculate_workout_stats(user):
     total_duration = Workout.objects.filter(user=user).aggregate(
         total=Sum('duration'))['total'] or 0
     
-    # Calculate active goals - goals that haven't passed their deadline
     active_goals = Goal.objects.filter(
         user=user,
         deadline__gte=today
@@ -36,23 +35,20 @@ def calculate_workout_stats(user):
 @login_required
 def dashboard(request):
     today = timezone.now().date()
-    
-    # Get recent workouts
+
     workouts = Workout.objects.filter(user=request.user).order_by('-date')[:5]
     
-    # Get active goals - goals that haven't passed their deadline
     goals = Goal.objects.filter(
         user=request.user,
         deadline__gte=today
     ).order_by('deadline')
-    
-    # Get latest progress
+
     try:
         latest_progress = Progress.objects.filter(user=request.user).latest('date')
     except Progress.DoesNotExist:
         latest_progress = None
     
-    # Calculate workout statistics
+
     stats = calculate_workout_stats(request.user)
 
     progress_records = Progress.objects.filter(
@@ -81,7 +77,6 @@ def dashboard(request):
     
     return render(request, 'workouts/dashboard.html', context)
 
-# Workout Views
 @login_required
 def workout_list(request):
     workouts = Workout.objects.filter(user=request.user).order_by('-date')
@@ -128,15 +123,13 @@ def workout_edit(request, pk):
     if request.method == 'POST':
         form = WorkoutForm(request.POST, instance=workout)
         if form.is_valid():
-            # Fetch updated duration and intensity
+ 
             duration = form.cleaned_data['duration']
             intensity = form.cleaned_data['intensity']
             type = form.cleaned_data['type']
-            
-            # Debugging statements to track duration, intensity, and calculated calories
+
             print(f"Updating workout: Duration={duration}, Intensity={intensity}, Type={type}")
 
-            # Calculate calories burned based on workout type
             calorieRates = {
                 'running': { 'low': 8, 'medium': 11, 'high': 14 },
                 'cycling': { 'low': 6, 'medium': 8, 'high': 10 },
@@ -153,7 +146,7 @@ def workout_edit(request, pk):
                 workout.calories_burned = round(caloriesPerMinute * duration)
                 print(f"Calories burned calculated: {workout.calories_burned}")
             
-            form.save()  # Save the updated workout
+            form.save() 
             messages.success(request, 'Workout updated successfully!')
             
             if request.headers.get('HX-Request'):
@@ -184,7 +177,6 @@ def workout_delete(request, pk):
     
     return redirect('workouts:workout_list')
 
-# Goal Views
 @login_required
 def goal_list(request):
     today = timezone.now().date()
@@ -236,7 +228,6 @@ def goal_delete(request, pk):
     messages.success(request, 'Goal deleted successfully!')
     return redirect('workouts:goal_list')
 
-# Progress Views
 @login_required
 def progress_list(request):
     progress_records = Progress.objects.filter(user=request.user).order_by('date')
@@ -254,7 +245,6 @@ def progress_add(request):
         if form.is_valid():
             progress = form.save(commit=False)
             progress.user = request.user
-            # BMI is calculated automatically by the model
             progress.save()
             messages.success(request, 'Progress logged successfully!')
             
