@@ -129,29 +129,7 @@ def workout_edit(request, pk):
     if request.method == 'POST':
         form = WorkoutForm(request.POST, instance=workout)
         if form.is_valid():
-            duration = form.cleaned_data['duration']
-            intensity = form.cleaned_data['intensity']
-            type = form.cleaned_data['type']
-
-            print(f"Updating workout: Duration={duration}, Intensity={intensity}, Type={type}")
-
-            calorieRates = {
-                'running': { 'low': 8, 'medium': 11, 'high': 14 },
-                'cycling': { 'low': 6, 'medium': 8, 'high': 10 },
-                'strength': { 'low': 7, 'medium': 9, 'high': 11 },
-                'hiit': { 'low': 12, 'medium': 14, 'high': 16 },
-                'yoga': { 'low': 4, 'medium': 6, 'high': 8 }
-            }
-
-            # Calculate calories based on type, duration, and intensity
-            base_rate = calorieRates.get(type.lower(), calorieRates['running'])
-            intensity_factor = {
-                'low': 0.8,
-                'medium': 1.0,
-                'high': 1.2
-            }[intensity.lower()]
-
-            workout.calories_burned = base_rate * duration * intensity_factor
+            workout = form.save(commit=False)
             workout.save()
             messages.success(request, 'Workout updated successfully!')
             

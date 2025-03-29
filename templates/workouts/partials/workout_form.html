@@ -6,15 +6,185 @@
 </div>
 <div class="modal-body">
     <form method="post" 
-      action="{% if workout %}{% url 'workouts:workout_edit' workout.pk %}{% else %}{% url 'workouts:workout_add' %}{% endif %}" 
-      hx-post="{% if workout %}{% url 'workouts:workout_edit' workout.pk %}{% else %}{% url 'workouts:workout_add' %}{% endif %}" 
-      hx-target="#workout-list"
-      id="workout-form">
+          action="{% if workout %}{% url 'workouts:workout_edit' workout.pk %}{% else %}{% url 'workouts:workout_add' %}{% endif %}" 
+          hx-post="{% if workout %}{% url 'workouts:workout_edit' workout.pk %}{% else %}{% url 'workouts:workout_add' %}{% endif %}" 
+          hx-target="#workout-list"
+          id="workout-form">
         {% csrf_token %}
-        {{ form|crispy }}
+
+        <div class="mb-3">
+            <label class="form-label">Workout Type</label>
+            <div class="workout-type-selector d-flex flex-wrap gap-3">
+                {% for type in form.type.field.choices %}
+                <div class="workout-type-option" data-value="{{ type.0 }}" id="workout-type-{{ type.0 }}">
+                    {% if type.0 == 'running' %}
+                    <i class="fas fa-running fa-2x" style="color: #2E6F40"></i>
+                    {% elif type.0 == 'cycling' %}
+                    <i class="fas fa-bicycle fa-2x" style="color: #68BA7F"></i>
+                    {% elif type.0 == 'swimming' %}
+                    <i class="fas fa-water fa-2x" style="color: #253D2C"></i>
+                    {% elif type.0 == 'weight_training' %}
+                    <i class="fas fa-dumbbell fa-2x" style="color: #CFFFDC"></i>
+                    {% elif type.0 == 'yoga' %}
+                    <i class="fas fa-moon fa-2x" style="color: #68BA7F"></i>
+                    {% elif type.0 == 'hiit' %}
+                    <i class="fas fa-clock fa-2x" style="color: #2E6F40"></i>
+                    {% elif type.0 == 'cardio' %}
+                    <i class="fas fa-heart fa-2x" style="color: #CFFFDC"></i>
+                    {% elif type.0 == 'other' %}
+                    <i class="fas fa-plus fa-2x" style="color: #253D2C"></i>
+                    {% endif %}
+                    <div class="workout-type-label">{{ type.1 }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {{ form.type.as_hidden }}
+            <input type="hidden" name="type" id="workout_type" value="{{ form.type.value|default:'' }}">
+        </div>
+        {{ form.duration|as_crispy_field }}
+        {{ form.intensity|as_crispy_field }}
+        {{ form.notes|as_crispy_field }}
+
         <div class="mt-3">
-            <button type="submit" class="btn btn-primary"  data-bs-dismiss="modal">Save</button>
+            <button type="submit" class="btn btn-primary">Save</button>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
         </div>
     </form>
 </div>
+
+<style>
+.workout-type-selector {
+    margin-top: 1rem;
+    border: 1px solid #ddd;
+    padding: 1rem;
+    border-radius: 8px;
+    background-color: #fff;
+}
+
+.workout-type-option {
+    position: relative;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    padding: 10px;
+    background-color: #CFFFDC;
+    text-align: center;
+    min-width: 120px;
+}
+
+.workout-type-option:hover {
+    border-color: #68BA7F;
+    transform: scale(1.05);
+}
+
+.workout-type-option.selected {
+    border-color: #2E6F40;
+    box-shadow: 0 0 10px rgba(46, 111, 64, 0.3);
+    background-color: #68BA7F;
+    color: white;
+    transform: scale(1.1);
+}
+
+.workout-type-option.selected::before {
+    content: "✓";
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 1.5rem;
+    color: #2E6F40;
+    background-color: white;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #2E6F40;
+}
+
+.workout-type-option i {
+    margin-bottom: 0.5rem;
+}
+
+.workout-type-label {
+    margin-top: 5px;
+    font-size: 0.875rem;
+    color: #253D2C;
+    font-weight: 500;
+}
+
+.workout-type-option.selected .workout-type-label {
+    color: white;
+}
+</style>
+
+<script>
+// Use immediate execution to avoid waiting for DOMContentLoaded 
+// if the script is loaded after DOM is ready
+(function() {
+    const options = document.querySelectorAll('.workout-type-option');
+    const hiddenInput = document.getElementById('workout_type');
+    const form = document.getElementById('workout-form');
+    
+    // Debug the current value
+    console.log('Initial workout type value:', hiddenInput.value);
+    
+    // Force a default selection if none is selected
+    function selectDefaultIfNone() {
+        const hasSelection = Array.from(options).some(opt => opt.classList.contains('selected'));
+        if (!hasSelection && options.length > 0) {
+            // Select the first option by default
+            options[0].classList.add('selected');
+            hiddenInput.value = options[0].dataset.value;
+            console.log('Selected default workout type:', options[0].dataset.value);
+        }
+    }
+    
+    // Set initial selection based on the hidden input value
+    function setInitialSelection() {
+        const initialValue = hiddenInput.value;
+        console.log('Setting initial selection to:', initialValue);
+        
+        let selected = false;
+        if (initialValue) {
+            const initialOption = document.querySelector(`.workout-type-option[data-value="${initialValue}"]`);
+            if (initialOption) {
+                initialOption.classList.add('selected');
+                selected = true;
+                console.log('Found and selected option for value:', initialValue);
+            }
+        }
+        
+        if (!selected) {
+            selectDefaultIfNone();
+        }
+    }
+    
+    options.forEach(option => {
+        option.addEventListener('click', function() {
+            options.forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+
+            const selectedValue = this.dataset.value;
+            hiddenInput.value = selectedValue;
+            
+            const typeFields = form.querySelectorAll('input[name="type"]');
+            typeFields.forEach(field => {
+                field.value = selectedValue;
+            });
+            
+            console.log('Selected workout type:', selectedValue);
+        });
+    });
+    setInitialSelection();
+    form.addEventListener('submit', function(event) {
+        if (!hiddenInput.value) {
+            event.preventDefault();
+            alert('Please select a workout type');
+            return false;
+        }
+        return true;
+    });
+})();
+</script>

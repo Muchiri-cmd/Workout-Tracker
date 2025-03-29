@@ -4,7 +4,7 @@ from django.core.validators import MinValueValidator
 from django.utils import timezone
 
 class Workout(models.Model):
-    WORKOUT_TYPES = [
+    TYPE_CHOICES = [
         ('running', 'Running'),
         ('cycling', 'Cycling'),
         ('swimming', 'Swimming'),
@@ -22,7 +22,7 @@ class Workout(models.Model):
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='workouts')
-    type = models.CharField(max_length=20, choices=WORKOUT_TYPES)
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES)
     duration = models.IntegerField(validators=[MinValueValidator(1)], help_text='Duration in minutes')
     intensity = models.CharField(max_length=10, choices=INTENSITY_CHOICES, default='medium')
     calories_burned = models.IntegerField(validators=[MinValueValidator(0)])
@@ -39,26 +39,29 @@ class Workout(models.Model):
 
     def calculate_calories(self):
         calorie_rates = {
-            'strength': 8,      
-            'cardio': 11,       
-            'hiit': 13.5,       
-            'yoga': 5,          
-            'calisthenics': 9, 
+            'running': 10,      # Cardio
+            'cycling': 11,     # Cardio
+            'swimming': 12,    # Cardio
+            'weight_training': 8,  # Strength
+            'yoga': 5,         # Yoga
+            'hiit': 14,        # HIIT
+            'cardio': 11,      # General cardio
+            'other': 10,       # Default cardio rate
         }
 
         intensity_factors = {
             'low': 0.8,
             'medium': 1.0,
-            'high': 1.2,
+            'high': 1.2
         }
 
-        base_rate = calorie_rates.get(self.type, 8)  
-        intensity_multiplier = intensity_factors.get(self.intensity, 1.0)
+        base_rate = calorie_rates.get(self.type.lower(), calorie_rates['other'])
+        intensity_factor = intensity_factors[self.intensity.lower()]
         
-        return int(base_rate * self.duration * intensity_multiplier)
+        return base_rate * self.duration * intensity_factor
 
     def __str__(self):
-        return f"{self.user.username}'s {self.get_type_display()} workout on {self.date.strftime('%Y-%m-%d')}"
+        return f"{self.get_type_display()} - {self.duration} minutes - {self.date.strftime('%Y-%m-%d')}"
 
 class Goal(models.Model):
     GOAL_TYPES = [

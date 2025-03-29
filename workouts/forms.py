@@ -8,6 +8,7 @@ class WorkoutForm(forms.ModelForm):
         widgets = {
             'notes': forms.Textarea(attrs={'rows': 3}),
             'duration': forms.NumberInput(attrs={'min': 1}),
+            'type': forms.Select(attrs={'class': 'form-control d-none'}),
         }
 
 class GoalForm(forms.ModelForm):
