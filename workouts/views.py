@@ -112,7 +112,9 @@ def workout_add(request):
                     'workouts': Workout.objects.filter(user=request.user).order_by('-date')[:5],
                     **calculate_workout_stats(request.user)
                 }
-                return render(request, 'workouts/partials/workout_list.html', context)
+                response = render(request, 'workouts/partials/workout_list.html', context)
+                response['HX-Trigger'] = 'statsUpdated'
+                return response
             return redirect('workouts:dashboard')
     else:
         form = WorkoutForm()
@@ -167,19 +169,21 @@ def workout_edit(request, pk):
 
 @login_required
 def workout_delete(request, pk):
+    workout = get_object_or_404(Workout, pk=pk, user=request.user)
     if request.method == 'POST':
-        workout = get_object_or_404(Workout, pk=pk, user=request.user)
         workout.delete()
         messages.success(request, 'Workout deleted successfully!')
         
         if request.headers.get('HX-Request'):
             context = {
-                'workouts': Workout.objects.filter(user=request.user).order_by('-date'),
+                'workouts': Workout.objects.filter(user=request.user).order_by('-date')[:5],
                 **calculate_workout_stats(request.user)
             }
-            return render(request, 'workouts/partials/workout_list.html', context)
-    
-    return redirect('workouts:workout_list')
+            response = render(request, 'workouts/partials/workout_list.html', context)
+            response['HX-Trigger'] = 'statsUpdated'
+            return response
+        return redirect('workouts:dashboard')
+    return render(request, 'workouts/partials/workout_delete.html', {'workout': workout})
 
 @login_required
 def goal_list(request):

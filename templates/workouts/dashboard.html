@@ -5,21 +5,21 @@
 
 {% block content %}
 <div class="container">
-    {% include "workouts/partials/stats_overview.html" %}
+    <div id="stats-overview-container" hx-trigger="statsUpdated from:body" hx-get="{% url 'workouts:stats_overview' %}" hx-target="#stats-overview">
+        {% include "workouts/partials/stats_overview.html" %}
+    </div>
 
     <div class="row">
         <div class="col-lg-8 mb-4">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Recent Workouts</h5>
-                    <button class="btn btn-primary btn-sm"
+                    <button class="btn btn-primary"
                             hx-get="{% url 'workouts:workout_add' %}"
                             hx-target="#modal-content"
                             data-bs-toggle="modal"
-                            data-bs-target="#modal"
-                            hx-trigger="click->#modal-content->load"
-                            hx-on:htmx:afterSwap="event.target.dispatchEvent(new Event('workoutAdded'))">
-                        <i class="fas fa-plus me-1"></i>Add Workout
+                            data-bs-target="#modal">
+                        <i class="fas fa-plus me-2"></i>Add Workout
                     </button>
                 </div>
                 <div class="card-body">
