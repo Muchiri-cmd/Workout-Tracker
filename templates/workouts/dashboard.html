@@ -5,36 +5,7 @@
 
 {% block content %}
 <div class="container">
-    <div class="row mb-4" id="stats-overview">
-        <div class="col-md-3">
-            <div class="stat-card">
-                <i class="fas fa-fire-flame-curved"></i>
-                <div class="stat-value">{{ total_calories|default:"0" }}</div>
-                <div class="stat-label">Total Calories Burned</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stat-card">
-                <i class="fas fa-clock"></i>
-                <div class="stat-value">{{ total_duration|default:"0" }}</div>
-                <div class="stat-label">Total Minutes</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stat-card">
-                <i class="fas fa-dumbbell"></i>
-                <div class="stat-value">{{ total_workouts|default:"0" }}</div>
-                <div class="stat-label">Total Workouts</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stat-card">
-                <i class="fas fa-bullseye"></i>
-                <div class="stat-value">{{ active_goals }}</div>
-                <div class="stat-label">Active Goals</div>
-            </div>
-        </div>
-    </div>
+    {% include "workouts/partials/stats_overview.html" %}
 
     <div class="row">
         <div class="col-lg-8 mb-4">
@@ -65,7 +36,6 @@
             </div>
         </div>
 
-    
         <div class="col-lg-4 mb-4">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -169,8 +139,22 @@
 {% block extra_js %}
 <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script id="progress-data" type="application/json">{{ progress_data|safe }}</script>
 <script>
+    function closeModal() {
+        const modalElement = document.getElementById('modal');
+        if (modalElement) {
+            const modal = bootstrap.Modal.getInstance(modalElement);
+            if (modal) {
+                modal.hide();
+            } else {
+             
+                modalElement.classList.remove('show');
+                modalElement.setAttribute('aria-hidden', 'true');
+                modalElement.removeAttribute('style');
+            }
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         try {
             const rawData = document.getElementById('progress-data').textContent;

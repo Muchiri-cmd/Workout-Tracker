@@ -3,6 +3,7 @@
         <div>
             <h5 class="mb-1">{{ workout.get_workout_type_display }}</h5>
             <p class="text-muted mb-2">
+                <p class="fw-bold text-uppercase">{{workout.type}}</p>
                 <i class="fas fa-fire me-1"></i>{{ workout.calories_burned }} calories
                 <i class="fas fa-clock ms-3 me-1"></i>{{ workout.duration }} minutes
             </p>

@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import StatsUpdateView
 
 app_name = 'workouts'
 
@@ -24,4 +25,7 @@ urlpatterns = [
     path('progress/add/', views.progress_add, name='progress_add'),
     path('progress/<int:pk>/edit/', views.progress_edit, name='progress_edit'),
     path('progress/<int:pk>/delete/', views.progress_delete, name='progress_delete'),
+    
+    # Stats URLs
+    path('stats-overview/', views.stats_overview, name='stats_overview'),
 ]

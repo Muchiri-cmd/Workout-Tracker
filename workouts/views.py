@@ -9,6 +9,7 @@ from datetime import timedelta
 from .models import Workout, Goal, Progress
 from .forms import WorkoutForm, GoalForm, ProgressForm
 import json 
+from django.views import View
 
 def calculate_workout_stats(user):
     """Calculate workout statistics for a user"""
@@ -107,8 +108,11 @@ def workout_add(request):
             messages.success(request, 'Workout added successfully!')
             
             if request.headers.get('HX-Request'):
-                workouts = Workout.objects.filter(user=request.user).order_by('-date')[:5]
-                return render(request, 'workouts/partials/workout_list.html', {'workouts': workouts})
+                context = {
+                    'workouts': Workout.objects.filter(user=request.user).order_by('-date')[:5],
+                    **calculate_workout_stats(request.user)
+                }
+                return render(request, 'workouts/partials/workout_list.html', context)
             return redirect('workouts:dashboard')
     else:
         form = WorkoutForm()
@@ -216,17 +220,33 @@ def goal_edit(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'Goal updated successfully!')
-            return redirect('workouts:goal_list')
+            
+            if request.headers.get('HX-Request'):
+                context = {
+                    'goals': Goal.objects.filter(user=request.user),
+                    'active_goals': Goal.objects.filter(user=request.user, deadline__gte=timezone.now().date()).count()
+                }
+                return render(request, 'workouts/partials/goal_list.html', context)
+            return redirect('workouts:dashboard')
     else:
         form = GoalForm(instance=goal)
-    return render(request, 'workouts/partials/goal_form.html', {'form': form, 'title': '','goal' : goal })
+    return render(request, 'workouts/partials/goal_form.html', {'form': form, 'title': 'Edit Goal', 'goal': goal})
 
 @login_required
 def goal_delete(request, pk):
-    goal = get_object_or_404(Goal, pk=pk, user=request.user)
-    goal.delete()
-    messages.success(request, 'Goal deleted successfully!')
-    return redirect('workouts:goal_list')
+    if request.method == 'POST':
+        goal = get_object_or_404(Goal, pk=pk, user=request.user)
+        goal.delete()
+        messages.success(request, 'Goal deleted successfully!')
+        
+        if request.headers.get('HX-Request'):
+            context = {
+                'goals': Goal.objects.filter(user=request.user),
+                'total_goals': Goal.objects.filter(user=request.user).count()
+            }
+            return render(request, 'workouts/partials/goal_list.html', context)
+    
+    return redirect('workouts:dashboard')
 
 @login_required
 def progress_list(request):
@@ -281,7 +301,17 @@ def progress_delete(request, pk):
     messages.success(request, 'Progress record deleted successfully!')
     return redirect('workouts:progress_list')
 
-
+@login_required
+def stats_overview(request):
+    if request.headers.get('HX-Request'):
+        context = {
+            'total_calories': Workout.objects.filter(user=request.user).aggregate(Sum('calories_burned'))['calories_burned__sum'] or 0,
+            'total_duration': Workout.objects.filter(user=request.user).aggregate(Sum('duration'))['duration__sum'] or 0,
+            'total_workouts': Workout.objects.filter(user=request.user).count(),
+            'active_goals': Goal.objects.filter(user=request.user, deadline__gte=timezone.now().date()).count()
+        }
+        return render(request, 'workouts/partials/stats_overview.html', context)
+    return redirect('workouts:dashboard')
 
 @login_required
 def profile(request):
@@ -300,3 +330,35 @@ def profile(request):
         'workout_stats': workout_stats,
     }
     return render(request, 'workouts/profile.html', context)
+
+class StatsUpdateView(View):
+    def get(self, request, *args, **kwargs):
+        # Calculate stats
+        total_calories = Workout.objects.filter(user=request.user).aggregate(Sum('calories_burned'))['calories_burned__sum'] or 0
+        total_duration = Workout.objects.filter(user=request.user).aggregate(Sum('duration'))['duration__sum'] or 0
+        total_workouts = Workout.objects.filter(user=request.user).count()
+        
+        # Prepare stats data
+        stats = [
+            {
+                'value': total_calories,
+                'label': 'Total Calories Burned',
+                'icon': 'fire-flame-curved'
+            },
+            {
+                'value': total_duration,
+                'label': 'Total Minutes',
+                'icon': 'clock'
+            },
+            {
+                'value': total_workouts,
+                'label': 'Total Workouts',
+                'icon': 'dumbbell'
+            }
+        ]
+        
+        html = render_to_string('workouts/partials/stats_overview.html', {
+            'stats': stats
+        }, request=request)
+        
+        return JsonResponse({'html': html})

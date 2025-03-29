@@ -14,7 +14,7 @@ def register(request):
             user = form.save()
             login(request, user)  
             messages.success(request, f'Welcome to FitTrack Pro, {user.first_name}! Your account has been created.')
-            return redirect('dashboard')
+            return redirect('workouts:dashboard')
     else:
         form = UserRegisterForm()
     return render(request, 'users/register.html', {'form': form})
