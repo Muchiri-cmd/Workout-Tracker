@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
-from .views import StatsUpdateView
+from .views import (
+    StatsUpdateView,
+)
 
 app_name = 'workouts'
 

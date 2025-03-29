@@ -6,12 +6,12 @@
 </div>
 <div class="modal-body">
     <form method="post" 
-          action="{% if workout %}{% url 'workouts:workout_edit' workout.pk %}{% else %}{% url 'workouts:workout_add' %}{% endif %}" 
-          hx-post="{% if workout %}{% url 'workouts:workout_edit' workout.pk %}{% else %}{% url 'workouts:workout_add' %}{% endif %}" 
+          action="{% if form.instance.pk %}{% url 'workouts:workout_edit' form.instance.pk %}{% else %}{% url 'workouts:workout_add' %}{% endif %}" 
+          hx-post="{% if form.instance.pk %}{% url 'workouts:workout_edit' form.instance.pk %}{% else %}{% url 'workouts:workout_add' %}{% endif %}" 
           hx-target="#workout-list"
           id="workout-form">
         {% csrf_token %}
-
+        
         <div class="mb-3">
             <label class="form-label">Workout Type</label>
             <div class="workout-type-selector d-flex flex-wrap gap-3">
@@ -38,15 +38,15 @@
                 </div>
                 {% endfor %}
             </div>
-            {{ form.type.as_hidden }}
-            <input type="hidden" name="type" id="workout_type" value="{{ form.type.value|default:'' }}">
+            {{ form.type }}
         </div>
+
         {{ form.duration|as_crispy_field }}
         {{ form.intensity|as_crispy_field }}
         {{ form.notes|as_crispy_field }}
 
         <div class="mt-3">
-            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Save</button>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
         </div>
     </form>
@@ -124,11 +124,11 @@
 // if the script is loaded after DOM is ready
 (function() {
     const options = document.querySelectorAll('.workout-type-option');
-    const hiddenInput = document.getElementById('workout_type');
     const form = document.getElementById('workout-form');
+    const typeField = form.querySelector('select[name="type"]');
     
     // Debug the current value
-    console.log('Initial workout type value:', hiddenInput.value);
+    console.log('Initial workout type value:', typeField.value);
     
     // Force a default selection if none is selected
     function selectDefaultIfNone() {
@@ -136,14 +136,14 @@
         if (!hasSelection && options.length > 0) {
             // Select the first option by default
             options[0].classList.add('selected');
-            hiddenInput.value = options[0].dataset.value;
+            typeField.value = options[0].dataset.value;
             console.log('Selected default workout type:', options[0].dataset.value);
         }
     }
     
     // Set initial selection based on the hidden input value
     function setInitialSelection() {
-        const initialValue = hiddenInput.value;
+        const initialValue = typeField.value;
         console.log('Setting initial selection to:', initialValue);
         
         let selected = false;
@@ -167,24 +167,54 @@
             this.classList.add('selected');
 
             const selectedValue = this.dataset.value;
-            hiddenInput.value = selectedValue;
-            
-            const typeFields = form.querySelectorAll('input[name="type"]');
-            typeFields.forEach(field => {
-                field.value = selectedValue;
-            });
+            typeField.value = selectedValue;
             
             console.log('Selected workout type:', selectedValue);
         });
     });
     setInitialSelection();
-    form.addEventListener('submit', function(event) {
-        if (!hiddenInput.value) {
-            event.preventDefault();
-            alert('Please select a workout type');
-            return false;
+    
+    // Add calorie calculation
+    function updateCalories() {
+        const duration = parseInt(form.querySelector('input[name="duration"]').value) || 0;
+        if (duration <= 0) {
+            form.querySelector('input[name="calories_burned"]').value = '';
+            return;
         }
-        return true;
+        
+        const calorieRates = {
+            'running': 11,
+            'cycling': 11,
+            'swimming': 12,
+            'weight_training': 9,
+            'yoga': 5,
+            'hiit': 14,
+            'cardio': 11,
+            'other': 10
+        };
+        
+        const baseRate = calorieRates[typeField.value] || 10;
+        const intensityFactors = {
+            'low': 0.8,
+            'medium': 1.0,
+            'high': 1.2
+        };
+        
+        const intensity = form.querySelector('select[name="intensity"]').value;
+        const intensityFactor = intensityFactors[intensity] || 1.0;
+        
+        const calories = Math.round(baseRate * duration * intensityFactor);
+        form.querySelector('input[name="calories_burned"]').value = calories;
+    }
+    
+    // Add event listeners for calorie calculation
+    form.addEventListener('change', function(event) {
+        if (event.target.name === 'type' || event.target.name === 'duration' || event.target.name === 'intensity') {
+            updateCalories();
+        }
     });
+    
+    // Initial calculation
+    updateCalories();
 })();
 </script>
