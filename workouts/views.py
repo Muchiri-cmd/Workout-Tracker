@@ -129,7 +129,6 @@ def workout_edit(request, pk):
     if request.method == 'POST':
         form = WorkoutForm(request.POST, instance=workout)
         if form.is_valid():
- 
             duration = form.cleaned_data['duration']
             intensity = form.cleaned_data['intensity']
             type = form.cleaned_data['type']
@@ -139,33 +138,38 @@ def workout_edit(request, pk):
             calorieRates = {
                 'running': { 'low': 8, 'medium': 11, 'high': 14 },
                 'cycling': { 'low': 6, 'medium': 8, 'high': 10 },
-                'swimming': { 'low': 7, 'medium': 10, 'high': 13 },
-                'weight_training': { 'low': 5, 'medium': 7, 'high': 9 },
-                'yoga': { 'low': 3, 'medium': 5, 'high': 7 },
-                'hiit': { 'low': 10, 'medium': 13, 'high': 16 },
-                'cardio': { 'low': 8, 'medium': 10, 'high': 12 },
-                'other': { 'low': 5, 'medium': 7, 'high': 9 }
+                'strength': { 'low': 7, 'medium': 9, 'high': 11 },
+                'hiit': { 'low': 12, 'medium': 14, 'high': 16 },
+                'yoga': { 'low': 4, 'medium': 6, 'high': 8 }
             }
-            
-            if type in calorieRates and intensity in calorieRates[type]:
-                caloriesPerMinute = calorieRates[type][intensity]
-                workout.calories_burned = round(caloriesPerMinute * duration)
-                print(f"Calories burned calculated: {workout.calories_burned}")
-            
-            form.save() 
+
+            # Calculate calories based on type, duration, and intensity
+            base_rate = calorieRates.get(type.lower(), calorieRates['running'])
+            intensity_factor = {
+                'low': 0.8,
+                'medium': 1.0,
+                'high': 1.2
+            }[intensity.lower()]
+
+            workout.calories_burned = base_rate * duration * intensity_factor
+            workout.save()
             messages.success(request, 'Workout updated successfully!')
             
             if request.headers.get('HX-Request'):
-                context = {'workouts': Workout.objects.filter(user=request.user).order_by('-date')}
-                return render(request, 'workouts/partials/workout_list.html', context)
-            return redirect('workouts:workout_list')
+                context = {
+                    'workouts': Workout.objects.filter(user=request.user).order_by('-date')[:5],
+                    **calculate_workout_stats(request.user)
+                }
+                response = render(request, 'workouts/partials/workout_list.html', context)
+                response['HX-Trigger'] = 'statsUpdated'
+                return response
+            return redirect('workouts:dashboard')
     else:
         form = WorkoutForm(instance=workout)
-
-    context = {'form': form, 'title': 'Edit Workout', 'workout': workout}
-    if request.headers.get('HX-Request'):
-        return render(request, 'workouts/partials/workout_form.html', context)
-    return render(request, 'workouts/workout_form.html', context)
+    
+    context = {'form': form, 'title': 'Edit Workout'}
+    template = 'workouts/partials/workout_form.html' if request.headers.get('HX-Request') else 'workouts/workout_form.html'
+    return render(request, template, context)
 
 @login_required
 def workout_delete(request, pk):
