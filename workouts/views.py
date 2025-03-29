@@ -334,10 +334,13 @@ def profile(request):
 class StatsUpdateView(View):
     def get(self, request, *args, **kwargs):
         # Calculate stats
-        total_calories = Workout.objects.filter(user=request.user).aggregate(Sum('calories_burned'))['calories_burned__sum'] or 0
-        total_duration = Workout.objects.filter(user=request.user).aggregate(Sum('duration'))['duration__sum'] or 0
+        total_calories = Workout.objects.filter(user=request.user).aggregate(
+            total_calories=Sum('calories_burned'))['total_calories'] or 0
+        total_duration = Workout.objects.filter(user=request.user).aggregate(
+            total_duration=Sum('duration'))['total_duration'] or 0
         total_workouts = Workout.objects.filter(user=request.user).count()
-        
+        active_goals = Goal.objects.filter(user=request.user, is_completed=False).count()
+
         # Prepare stats data
         stats = [
             {
@@ -354,6 +357,11 @@ class StatsUpdateView(View):
                 'value': total_workouts,
                 'label': 'Total Workouts',
                 'icon': 'dumbbell'
+            },
+            {
+                'value': active_goals,
+                'label': 'Active Goals',
+                'icon': 'bullseye'
             }
         ]
         

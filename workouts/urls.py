@@ -28,4 +28,5 @@ urlpatterns = [
     
     # Stats URLs
     path('stats-overview/', views.stats_overview, name='stats_overview'),
+    path('stats-update/', StatsUpdateView.as_view(), name='stats_update')
 ]

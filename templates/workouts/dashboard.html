@@ -16,7 +16,9 @@
                             hx-get="{% url 'workouts:workout_add' %}"
                             hx-target="#modal-content"
                             data-bs-toggle="modal"
-                            data-bs-target="#modal">
+                            data-bs-target="#modal"
+                            hx-trigger="click->#modal-content->load"
+                            hx-on:htmx:afterSwap="event.target.dispatchEvent(new Event('workoutAdded'))">
                         <i class="fas fa-plus me-1"></i>Add Workout
                     </button>
                 </div>

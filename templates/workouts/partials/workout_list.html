@@ -1,38 +1,5 @@
 {% load humanize %}
 
-<div id="stats-overview">
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="stat-card">
-                <i class="fas fa-fire-flame-curved"></i>
-                <div class="stat-value">{{ total_calories|default:"0" }}</div>
-                <div class="stat-label">Total Calories Burned</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stat-card">
-                <i class="fas fa-clock"></i>
-                <div class="stat-value">{{ total_duration|default:"0" }}</div>
-                <div class="stat-label">Total Minutes</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stat-card">
-                <i class="fas fa-dumbbell"></i>
-                <div class="stat-value">{{ total_workouts|default:"0" }}</div>
-                <div class="stat-label">Total Workouts</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stat-card">
-                <i class="fas fa-bullseye"></i>
-                <div class="stat-value">{{ active_goals }}</div>
-                <div class="stat-label">Active Goals</div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div id="workout-list">
     {% if workouts %}
         {% for workout in workouts %}
