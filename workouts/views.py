@@ -210,8 +210,13 @@ def goal_add(request):
             messages.success(request, 'Goal added successfully!')
             
             if request.headers.get('HX-Request'):
-                goals = Goal.objects.filter(user=request.user, deadline__gte=timezone.now().date()).order_by('deadline')
-                return render(request, 'workouts/partials/goal_list.html', {'goals': goals})
+                context = {
+                    'goals': Goal.objects.filter(user=request.user, deadline__gte=timezone.now().date()).order_by('deadline'),
+                    **calculate_workout_stats(request.user)
+                }
+                response = render(request, 'workouts/partials/goal_list.html', context)
+                response['HX-Trigger'] = 'statsUpdated'
+                return response
             return redirect('workouts:dashboard')
     else:
         form = GoalForm()
@@ -249,12 +254,14 @@ def goal_delete(request, pk):
         
         if request.headers.get('HX-Request'):
             context = {
-                'goals': Goal.objects.filter(user=request.user),
-                'total_goals': Goal.objects.filter(user=request.user).count()
+                'goals': Goal.objects.filter(user=request.user, deadline__gte=timezone.now().date()).order_by('deadline'),
+                **calculate_workout_stats(request.user)
             }
-            return render(request, 'workouts/partials/goal_list.html', context)
-    
-    return redirect('workouts:dashboard')
+            response = render(request, 'workouts/partials/goal_list.html', context)
+            response['HX-Trigger'] = 'statsUpdated'
+            return response
+        return redirect('workouts:dashboard')
+    return render(request, 'workouts/partials/goal_delete.html', {'goal': goal})
 
 @login_required
 def progress_list(request):
