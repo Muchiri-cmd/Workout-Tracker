@@ -24,13 +24,13 @@
                     {% elif type.0 == 'swimming' %}
                     <i class="fas fa-water fa-2x" style="color: #253D2C"></i>
                     {% elif type.0 == 'weight_training' %}
-                    <i class="fas fa-dumbbell fa-2x" style="color: #CFFFDC"></i>
+                    <i class="fas fa-dumbbell fa-2x" style="color: #253D2C"></i>
                     {% elif type.0 == 'yoga' %}
                     <i class="fas fa-moon fa-2x" style="color: #68BA7F"></i>
                     {% elif type.0 == 'hiit' %}
                     <i class="fas fa-clock fa-2x" style="color: #2E6F40"></i>
                     {% elif type.0 == 'cardio' %}
-                    <i class="fas fa-heart fa-2x" style="color: #CFFFDC"></i>
+                    <i class="fas fa-heart fa-2x" style="color: #253D2C"></i>
                     {% elif type.0 == 'other' %}
                     <i class="fas fa-plus fa-2x" style="color: #253D2C"></i>
                     {% endif %}
@@ -117,6 +117,30 @@
 
 .workout-type-option.selected .workout-type-label {
     color: white;
+}
+
+/* Special styling for weight training and cardio */
+#workout-type-weight_training .workout-type-label,
+#workout-type-cardio .workout-type-label {
+    font-weight: 600;
+}
+
+#workout-type-weight_training .workout-type-option:hover,
+#workout-type-cardio .workout-type-option:hover {
+    border-color: #253D2C;
+    box-shadow: 0 4px 8px rgba(37, 61, 44, 0.2);
+}
+
+#workout-type-weight_training .workout-type-option.selected,
+#workout-type-cardio .workout-type-option.selected {
+    background-color: #253D2C;
+    color: white;
+}
+
+#workout-type-weight_training .workout-type-option.selected::before,
+#workout-type-cardio .workout-type-option.selected::before {
+    color: #2E6F40;
+    border-color: #2E6F40;
 }
 
 .calorie-display {
