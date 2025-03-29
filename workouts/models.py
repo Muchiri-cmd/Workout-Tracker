@@ -4,49 +4,45 @@ from django.core.validators import MinValueValidator
 from django.utils import timezone
 
 class Workout(models.Model):
-    TYPE_CHOICES = [
+    WORKOUT_TYPES = [
         ('running', 'Running'),
         ('cycling', 'Cycling'),
         ('swimming', 'Swimming'),
         ('weight_training', 'Weight Training'),
-        ('yoga', 'Yoga/Flexibility'),
+        ('yoga', 'Yoga'),
         ('hiit', 'HIIT'),
         ('cardio', 'Cardio'),
-        ('other', 'Other'),
+        ('other', 'Other')
     ]
 
-    INTENSITY_CHOICES = [
+    INTENSITY_LEVELS = [
         ('low', 'Low'),
         ('medium', 'Medium'),
-        ('high', 'High'),
+        ('high', 'High')
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='workouts')
-    type = models.CharField(max_length=20, choices=TYPE_CHOICES)
-    duration = models.IntegerField(validators=[MinValueValidator(1)], help_text='Duration in minutes')
-    intensity = models.CharField(max_length=10, choices=INTENSITY_CHOICES, default='medium')
-    calories_burned = models.IntegerField(validators=[MinValueValidator(0)])
-    date = models.DateTimeField(default=timezone.now)
+    type = models.CharField(max_length=20, choices=WORKOUT_TYPES)
+    duration = models.IntegerField(validators=[MinValueValidator(1)], help_text="Duration in minutes")
+    intensity = models.CharField(max_length=10, choices=INTENSITY_LEVELS, default='medium')
+    calories_burned = models.IntegerField(default=0)
     notes = models.TextField(blank=True)
+    date = models.DateTimeField(default=timezone.now)
 
     class Meta:
         ordering = ['-date']
 
     def save(self, *args, **kwargs):
-        if not self.calories_burned:  
-            self.calories_burned = self.calculate_calories()
-        super().save(*args, **kwargs)
-
-    def calculate_calories(self):
+        # Calculate calories based on workout type, duration, and intensity
         calorie_rates = {
-            'running': 10,      # Cardio
-            'cycling': 11,     # Cardio
-            'swimming': 12,    # Cardio
-            'weight_training': 8,  # Strength
-            'yoga': 5,         # Yoga
-            'hiit': 14,        # HIIT
-            'cardio': 11,      # General cardio
-            'other': 10,       # Default cardio rate
+            'running': 10,
+            'cycling': 10,
+            'swimming': 11,
+            'weight_training': 8,
+            'yoga': 5,
+            'hiit': 13,
+            'cardio': 10,
+            'other': 7
         }
 
         intensity_factors = {
@@ -55,10 +51,12 @@ class Workout(models.Model):
             'high': 1.2
         }
 
-        base_rate = calorie_rates.get(self.type.lower(), calorie_rates['other'])
-        intensity_factor = intensity_factors[self.intensity.lower()]
+        base_rate = calorie_rates.get(self.type, 7)
+        factor = intensity_factors.get(self.intensity, 1.0)
         
-        return base_rate * self.duration * intensity_factor
+        self.calories_burned = int(base_rate * self.duration * factor)
+        
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.get_type_display()} - {self.duration} minutes - {self.date.strftime('%Y-%m-%d')}"

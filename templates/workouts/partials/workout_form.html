@@ -43,7 +43,6 @@
 
         {{ form.duration|as_crispy_field }}
         {{ form.intensity|as_crispy_field }}
-        {{ form.notes|as_crispy_field }}
 
         <div class="mt-3">
             <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Save</button>
@@ -67,15 +66,17 @@
     border: 2px solid transparent;
     border-radius: 8px;
     transition: all 0.3s ease;
-    padding: 10px;
-    background-color: #CFFFDC;
+    padding: 15px;
+    background-color: white;
     text-align: center;
     min-width: 120px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .workout-type-option:hover {
-    border-color: #68BA7F;
+    border-color: #2E6F40;
     transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 .workout-type-option.selected {
@@ -89,8 +90,8 @@
 .workout-type-option.selected::before {
     content: "✓";
     position: absolute;
-    top: 0;
-    right: 0;
+    top: -5px;
+    right: -5px;
     font-size: 1.5rem;
     color: #2E6F40;
     background-color: white;
@@ -116,6 +117,26 @@
 
 .workout-type-option.selected .workout-type-label {
     color: white;
+}
+
+.calorie-display {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #CFFFDC;
+    border-radius: 8px;
+    border: 1px solid #68BA7F;
+    text-align: center;
+}
+
+.calorie-display h4 {
+    color: #2E6F40;
+    margin: 0.5rem 0;
+}
+
+.calorie-display .calories-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #253D2C;
 }
 </style>
 
@@ -176,45 +197,44 @@
     
     // Add calorie calculation
     function updateCalories() {
-        const duration = parseInt(form.querySelector('input[name="duration"]').value) || 0;
-        if (duration <= 0) {
-            form.querySelector('input[name="calories_burned"]').value = '';
-            return;
-        }
+        const type = document.querySelector('input[name="type"]').value;
+        const duration = parseInt(document.querySelector('input[name="duration"]').value) || 0;
+        const intensity = document.querySelector('select[name="intensity"]').value;
         
+        // Base calorie burn rates per minute
         const calorieRates = {
-            'running': 11,
-            'cycling': 11,
-            'swimming': 12,
-            'weight_training': 9,
+            'running': 10,
+            'cycling': 10,
+            'swimming': 11,
+            'weight_training': 8,
             'yoga': 5,
-            'hiit': 14,
-            'cardio': 11,
-            'other': 10
+            'hiit': 13,
+            'cardio': 10,
+            'other': 7
         };
-        
-        const baseRate = calorieRates[typeField.value] || 10;
+
+        // Intensity factors
         const intensityFactors = {
             'low': 0.8,
             'medium': 1.0,
             'high': 1.2
         };
+
+        const baseRate = calorieRates[type] || 7;
+        const factor = intensityFactors[intensity] || 1.0;
         
-        const intensity = form.querySelector('select[name="intensity"]').value;
-        const intensityFactor = intensityFactors[intensity] || 1.0;
-        
-        const calories = Math.round(baseRate * duration * intensityFactor);
-        form.querySelector('input[name="calories_burned"]').value = calories;
+        const calories = Math.round(baseRate * duration * factor);
+        document.getElementById('calories-burned').textContent = calories;
     }
     
+    // Update calories when form loads
+    updateCalories();
+
     // Add event listeners for calorie calculation
     form.addEventListener('change', function(event) {
         if (event.target.name === 'type' || event.target.name === 'duration' || event.target.name === 'intensity') {
             updateCalories();
         }
     });
-    
-    // Initial calculation
-    updateCalories();
 })();
 </script>
